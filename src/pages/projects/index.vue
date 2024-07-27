@@ -1,14 +1,29 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
-import { useRoute } from 'vue-router'
-// const route = useRoute()s
+import supabase from '@/lib/supabaseClient'
+import { ref } from 'vue'
+import type { Tables } from '../../../database/types';
+
+const projects = ref<Tables<'projects'>[] | null>(null)
+
+;(async () => {
+  const { data, error } = await supabase.from('projects').select()
+  if (error) {
+    console.error(error)
+  }
+  projects.value = data
+
+  console.log(projects.value)
+})()
 </script>
 
 <template>
   <div>
     <h1>Projects Page</h1>
-    <RouterLink :to="{name: '/projects/[id]', params: {'id': 1}}">Go to project 1</RouterLink>
-    <br />
-    <RouterLink to="/">Back to Home</RouterLink>
+    <ul>
+      <li v-for="project in projects" :key="project.id">
+        <RouterLink :to="{ name: '/projects/[id]', params: { id: project.id } }">{{ project.name }}</RouterLink>
+      </li>
+    </ul>
   </div>
 </template>
